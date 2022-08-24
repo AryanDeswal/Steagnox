@@ -21,7 +21,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'Home_Page'
+    'Home_Page',
+    'Image_embed',
+    'Image_extract',
 ]
 
 MIDDLEWARE = [
