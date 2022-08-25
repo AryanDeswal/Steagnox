@@ -9,13 +9,14 @@ import os
 
 
 def clean_dir(dir_path):
-    res = img_names(dir_path)
+    res = file_names(dir_path)
 
     for i in range(0, len(res)):
-        os.remove(dir_path + res[i])
+        if (res[i] != 'test.txt'):
+            os.remove(dir_path + res[i])
 
 
-def img_names(dir_path):
+def file_names(dir_path):
     res = []
     # Iterate directory
     for path in os.listdir(dir_path):
@@ -25,15 +26,7 @@ def img_names(dir_path):
     return res
 
 
-def create_data_file(data):
-    path = 'media\data.txt'
-    file_handle = open(path, 'w')
-    file_handle.write(data)
-    file_handle.close
-    return path
-
-
-def spiltbyte(by):  # 011 000 01
+def spiltbyte(by): 
     first_three_bits = by >> 5
     mid_three_bits = (by >> 2) & 7
     last_two_bits = by & 3
@@ -46,10 +39,10 @@ def getMetaData(file_to_embed):
         file_size = os.path.getsize(file_to_embed)
         if file_size > 9999999999:
             return None  # More than the max support
-        # Pad * at the RHS to make it of length : 10
+
         file_size = str(file_size).ljust(10, '*')
-        file_name = os.path.basename(file_to_embed)  # exclude the parent path
-        # Pad * at the RHS to make it of len 20, doesnt pad is len is already > 20
+        file_name = os.path.basename(file_to_embed)  
+
         file_name = file_name.ljust(20, '*')
         # reduce the len to 20 by slicing
         file_name = file_name[len(file_name)-20:]
@@ -72,8 +65,6 @@ def crypt(src, key):
 def embed(vessel_image, target_image, src_file, passcode):
     # load the vessel_image into memory
     mem_image = cv2.imread(vessel_image)
-    # print(type(mem_image))
-    # print(mem_image.shape)
 
     # form the metadata
     header = getMetaData(src_file)
@@ -134,38 +125,40 @@ def embed(vessel_image, target_image, src_file, passcode):
 
 def embed_image(request):
     """Process images uploaded by users"""
-    dir_path = r'.//media//images//'
-    clean_dir(dir_path)
+    dir_path_img = r'.//media//images//'
+    dir_path_file = r'.//media//Files//'
+    clean_dir(dir_path_img)
+    clean_dir(dir_path_file)
     if request.method == 'POST':
         form = ImageForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
 
             # Encrypting raw image
-            raw_img_path = dir_path+img_names(dir_path)[0]
-            enc_img_path = "encrypted_img.png"       #png is necessary for decryption to work
-            data = form.cleaned_data['Data']
-            data_file_path = create_data_file(data)
+            raw_img_path = ""
+            if (file_names(dir_path_img)[0] == 'test.txt'):
+                raw_img_path = dir_path_img+file_names(dir_path_img)[1]
+            else:
+                raw_img_path = dir_path_img+file_names(dir_path_img)[0]
+            enc_img_path = "encrypted_img.png"  # png is necessary for decryption to work
+           
+            src_file_path = ""
+            if (file_names(dir_path_img)[0] == 'test.txt'):
+                src_file_path = dir_path_file+file_names(dir_path_file)[1]
+            else:
+                src_file_path = dir_path_file+file_names(dir_path_file)[0]
+
             password = form.cleaned_data['Password']
 
-            embed(raw_img_path, enc_img_path, data_file_path, password)
+            embed(raw_img_path, enc_img_path, src_file_path, password)
 
             # Removing user information from server
-            os.remove(data_file_path)
-            clean_dir(dir_path)
-            form = ImageForm()
-            # Get the current instance object to display in the template
+            clean_dir(dir_path_img)
+            clean_dir(dir_path_file)
+
             img_obj = form.instance
-            return render(request, 'embed_image.html', {'img_obj': img_obj, 'data': data, 'form': form})
+            return render(request, 'embed_output.html', {'img_obj': img_obj})
     else:
         form = ImageForm()
-        
+
     return render(request, 'embed_image.html', {'form': form})
-
-
-
-
-
-
-
-

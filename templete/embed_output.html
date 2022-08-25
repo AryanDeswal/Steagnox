@@ -11,17 +11,12 @@
 <body>
   <!-- ********************** this is the form by which user uploads images(2 images)********* -->
 
-  <form  method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-     {{ form.as_p }}       
-    <button id="submitbtn" type="submit">Upload</button>
-  </form>
+  
   <!-- ********************** images upload form end **************  -->
   
-  
-  <!-- *********** final image box ends *************  -->
-
-  <!-- ================= javascript==========  -->
-  <script src="{% static './js/main.js' %}"></script>
-</body>
-</html>
+  <!-- ****************** this is the box into which images after processing comes out **** -->
+  {% if img_obj %}
+    <h3>Succesfully embeded :</h3>
+    <img src="{% static './encrypted_img.png' %}" alt="img" style="max-height:300px">
+    <!-- <h1>Data Embeded = {{data}}</h1> -->
+  {% endif %}
