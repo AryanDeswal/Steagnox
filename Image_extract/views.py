@@ -7,6 +7,7 @@ import os
 
 # Create your views here.
 
+
 def clean_dir(dir_path):
     res = file_names(dir_path)
 
@@ -55,98 +56,107 @@ def getMetaData(file_to_embed):
         return None
 
 
-def crypt(src, key):
-    crypted = ''
+def decrypt(src, key):
+    decrypted = ''
     i = 0
     l = len(key)
     for s in src:
-        crypted += chr(ord(s) ^ ord(key[i]))
+        decrypted += chr(ord(s) ^ ord(key[i]))
         i = (i+1) % l
-    return crypted
+    return decrypted
 
-def read(file_name):
-    file_handle = open(file_name, 'r')
-    text=file_handle.read()
-    file_handle.close()
-    return text
+# def read(file_name):
+#     file_handle = open(file_name, 'r')
+#     text=file_handle.read()
+#     file_handle.close()
+#     return text
+
 
 def extract_data(emb_image, passcode):
-    #load the image in memory
+    # load the image in memory
     mem_img = cv2.imread(emb_image)
-    qty_to_extract = 30 #of header
+    qty_to_extract = 30  # of header
 
     width = mem_img.shape[1]
-    indx =0
+    indx = 0
     buffer = ''
     temp = []
     while indx < qty_to_extract:
-        r = indx //width
+        r = indx // width
         c = indx % width
         temp.clear()
-        for i in range(3): #0,1,2
-            temp.append(mem_img[r,c,2-i] & 2 ** (3 - (i+1) // 3) - 1)
+        for i in range(3):  # 0,1,2
+            temp.append(mem_img[r, c, 2-i] & 2 ** (3 - (i+1) // 3) - 1)
 
         buffer += chr(merge_bits(temp))
-        indx+=1
+        indx += 1
 
-
-    buffer = crypt(buffer, passcode)
+    buffer = decrypt(buffer, passcode)
 
     try:
-        qty_to_extract = int(buffer[:10].strip('*')) +30
+        qty_to_extract = int(buffer[:10].strip('*')) + 30
     except:
-        return "Wrong Answer"
+        return
     file_name = buffer[10:].strip('*')
 
-    indx =30
+    indx = 30
     temp = []
 
-    
-    file_handle = open(file_name, 'wb')
-    
-
+    # file_handle = open(file_name, 'wb')
+    # Location for saving src_file
+    file_handle = open('./media/output/' + file_name, 'wb')
 
     while indx < qty_to_extract:
-        r = indx //width
+        r = indx // width
         c = indx % width
         temp.clear()
-        for i in range(3): #0,1,2
-            temp.append(mem_img[r,c,2-i] & 2 ** (3 - (i+1) // 3) - 1)
+        for i in range(3):  # 0,1,2
+            temp.append(mem_img[r, c, 2-i] & 2 ** (3 - (i+1) // 3) - 1)
 
         x = int(merge_bits(temp))
 
-        file_handle.write(int.to_bytes(x,1,"big"))
-        indx+=1
+        file_handle.write(int.to_bytes(x, 1, "big"))
+        indx += 1
     file_handle.close()
-
-    return read(file_name)
-
-
 
 
 def extract_image(request):
-    dir_path = r'.//media//images//'
-    clean_dir(dir_path)
-    form2 = ExtImageForm(request.POST, request.FILES)
+    dir_path_file = r'.//media//images//'
+    dir_path_output = r'.//media//output//'
+    clean_dir(dir_path_file)
+    clean_dir(dir_path_output)
+    form = ExtImageForm(request.POST, request.FILES)
     if request.method == 'POST':
-        if form2.is_valid():
-            form2.save()
-            
-            #--------------------------------------------
+        if form.is_valid():
+            form.save()
+
+            # --------------------------------------------
             enc_img_path = ""
-            if (file_names(dir_path)[0] == 'test.txt'):
-                enc_img_path = dir_path+file_names(dir_path)[1]
+            if (file_names(dir_path_file)[0] == 'test.txt'):
+                enc_img_path = dir_path_file+file_names(dir_path_file)[1]
             else:
-                enc_img_path = dir_path+file_names(dir_path)[0]   #png is necessary for decryption to work
-            password = form2.cleaned_data['Password']
+                enc_img_path = dir_path_file+file_names(dir_path_file)[0]
 
-            text=extract_data(enc_img_path,password)
+            password = form.cleaned_data['Password']
+
+            extract_data(enc_img_path, password)
             # Removing user information from server
-            os.remove('data.txt')
-            clean_dir(dir_path)
-            
-            #--------------------------------------------
-            img_obj = form2.instance
-            return render(request, 'extract_image.html', { 'img_obj': img_obj,'password':password})
+            clean_dir(dir_path_file)
 
-    return render(request, 'extract_image.html', {'form2': form2})
+            res = file_names(dir_path_output)
+            if (len(res) == 2):
+                res_file_name = ""
+                if (res[0] == 'test.txt'):
+                    res_file_name = res[1]
+                else:
+                    res_file_name = res[0]
+                
+                img_obj = form.instance 
+                return render(request, 'extract_output.html', {'img_obj': img_obj, 'password': password, 'output_file_name': res_file_name})
+            else:
+                
+                return render(request, 'wrong_password.html')
+
+            # --------------------------------------------
+
+    return render(request, 'extract_image.html', {'form2': form})
