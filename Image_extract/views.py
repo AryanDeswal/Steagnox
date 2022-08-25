@@ -124,7 +124,7 @@ def extract_data(emb_image, passcode):
 
 
 
-def extract(request):
+def extract_image(request):
     dir_path = r'.//media//images//'
     clean_dir(dir_path)
     form2 = ExtImageForm(request.POST, request.FILES)
