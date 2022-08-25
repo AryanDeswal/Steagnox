@@ -153,10 +153,10 @@ def embed_image(request):
             # Removing user information from server
             os.remove(data_file_path)
             clean_dir(dir_path)
-            
+            form = ImageForm()
             # Get the current instance object to display in the template
             img_obj = form.instance
-            return render(request, 'embed_image.html', {'img_obj': img_obj, 'data': data})
+            return render(request, 'embed_image.html', {'img_obj': img_obj, 'data': data, 'form': form})
     else:
         form = ImageForm()
         
