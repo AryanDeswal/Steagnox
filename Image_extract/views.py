@@ -1,10 +1,11 @@
 from fileinput import filename
-from django.shortcuts import render
+from django.http import FileResponse
+from django.shortcuts import render, HttpResponse
 from .forms import ExtImageForm
 from importlib.metadata import metadata
 import cv2
 import os
-
+import mimetypes
 # Create your views here.
 
 
@@ -118,6 +119,29 @@ def extract_data(emb_image, passcode):
         file_handle.write(int.to_bytes(x, 1, "big"))
         indx += 1
     file_handle.close()
+
+def download_fl(request):
+    # fill these variables with real values
+    dir_path_output = r'.//media//output//'
+    res = file_names(dir_path_output)
+    res_file_name=""
+    if (res[0] == 'test.txt'):
+        res_file_name = res[1]
+    else:
+        res_file_name = res[0]
+
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    filename = res_file_name
+    filepath = BASE_DIR + '\\media\\output\\' + filename
+    path = open(filepath, 'rb')
+    mime_type, _ = mimetypes.guess_type(filepath)
+    response = HttpResponse(path, content_type=mime_type)
+    response['Content-Disposition'] = "attachment; filename=%s" % filename
+    
+    return response
+
+
+
 
 
 def extract_image(request):

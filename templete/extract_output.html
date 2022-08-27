@@ -9,12 +9,11 @@
 </head>
 <body>
 
-    {% if img_obj %}
+  {% if img_obj %}
     <h3>{{password}}</h3>
     <h2>{{output_file_name}}</h2>
-    <!-- <img src="{% static './encrypted_img.png' %}" alt="img" style="max-height:300px"> -->
-    <!-- <h1>{{text}}</h1> -->
-    
+    <a href="{% url 'download_fl' %}">Download File</a>
+    <button><a href="/extract_image">extract another file</a></button>
   {% endif %}
     
 </body>
