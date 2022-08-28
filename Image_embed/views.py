@@ -1,9 +1,10 @@
+from django.http import HttpResponse
 from django.shortcuts import render
 from .forms import ImageForm
 from importlib.metadata import metadata
 import cv2
 import os
-
+import mimetypes
 # ------------------------------------------------------
 # Functions
 
@@ -121,8 +122,22 @@ def embed(vessel_image, target_image, src_file, passcode):
     cv2.imwrite(target_image, mem_image)
 
 # ------------------------------------------------------
+def download_enc(request):
 
 
+    BASE_DIRT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    filename = 'encrypted_img.png'
+    filepath = BASE_DIRT + '\\' + filename
+    print(filepath)
+    print(filename)
+    path = open(filepath, 'rb')
+    mime_type, _ = mimetypes.guess_type(filepath)
+    print(mime_type)
+    response = HttpResponse(path, content_type=mime_type)
+    response['Content-Disposition'] = "attachment; filename=%s" % filename
+    
+    return response
+# -------------------------------- 
 def embed_image(request):
     """Process images uploaded by users"""
     dir_path_img = r'.//media//images//'
