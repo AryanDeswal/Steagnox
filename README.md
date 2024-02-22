@@ -4,7 +4,7 @@
 <h3 align="center">Welcome to Steagnox</h3>
 
 # 🎇 Steagnox 🎇
-Steagnox is a technique for allowing people to silently hide his data inside a his photo.
+Steagnox is a web application that employs steganography to conceal sensitive information within images securely. Leveraging advanced encryption techniques, it embeds data seamlessly into the visual content, ensuring imperceptibility to the naked eye. Users can encode confidential text or files into images of their choice, safeguarding them from unauthorized access during transmission or storage. With a user-friendly interface, this tool facilitates seamless integration into various workflows, empowering individuals and organizations to protect their sensitive material effectively.
 
 <h2> Why this project : </h2>
 
